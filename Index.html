@@ -1,0 +1,181 @@
+
+<!-- Nome: Guilherme Henrique Anschau Xavier de Oliveira
+     Turma:  T01 (2025.2 - 5N123)
+      Matrícula:  	20230021439                      -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Equipamentos do Eggman</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Catálogo de Equipamentos do Eggman</h1>
+            <div class="counters">
+                <span>Total: {{ totalEquipments }}</span>
+                <span>Disponíveis: {{ availableCount }}</span>
+                <span>Emprestados: {{ borrowedCount }}</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="form-section">
+                <h2>{{ isEditing ? 'Editar Equipamento' : 'Adicionar Novo Equipamento' }}</h2>
+                <form @submit.prevent="saveEquipment">
+                    <div class="form-group">
+                        <label for="name">Nome do Equipamento:</label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            v-model="currentEquipment.name" 
+                            required
+                            aria-required="true"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category">Categoria:</label>
+                        <select 
+                            id="category" 
+                            v-model="currentEquipment.category" 
+                            required
+                            aria-required="true"
+                        >
+                            <option value="">Selecione uma categoria</option>
+                            <option value="Robótica">Robótica</option>
+                            <option value="Energia">Energia</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Defesa">Defesa</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="patrimony">Número de Patrimônio:</label>
+                        <input 
+                            type="text" 
+                            id="patrimony" 
+                            v-model="currentEquipment.patrimony" 
+                            required
+                            aria-required="true"
+                            placeholder="EGGMAN-0001"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Status:</label>
+                        <select 
+                            id="status" 
+                            v-model="currentEquipment.status" 
+                            required
+                            aria-required="true"
+                        >
+                            <option value="disponível">Disponível</option>
+                            <option value="emprestado">Emprestado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button 
+                            type="submit" 
+                            :disabled="!isFormValid"
+                            :title="isFormValid ? 'Salvar equipamento' : 'Preencha todos os campos'"
+                        >
+                            {{ isEditing ? 'Salvar Alterações' : 'Adicionar' }}
+                        </button>
+                        
+                        <button 
+                            type="button" 
+                            @click="cancelEdit" 
+                            v-if="isEditing"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="filters">
+                <h2>Filtrar Equipamentos</h2>
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="filterCategory">Categoria:</label>
+                        <select id="filterCategory" v-model="filterCategory">
+                            <option value="">Todas</option>
+                            <option value="Robótica">Robótica</option>
+                            <option value="Energia">Energia</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Defesa">Defesa</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="filterStatus">Status:</label>
+                        <select id="filterStatus" v-model="filterStatus">
+                            <option value="">Todos</option>
+                            <option value="disponível">Disponível</option>
+                            <option value="emprestado">Emprestado</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="equipment-list">
+                <h2>Lista de Equipamentos</h2>
+                
+                <div v-if="filteredEquipments.length === 0" class="empty-state">
+                    <p v-if="equipments.length === 0">Nenhum equipamento cadastrado. Adicione o primeiro equipamento do Eggman!</p>
+                    <p v-else>Nenhum equipamento corresponde aos filtros aplicados.</p>
+                </div>
+                
+                <table v-else class="equipment-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Categoria</th>
+                            <th>Patrimônio</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="equipment in filteredEquipments" :key="equipment.id">
+                            <td>{{ equipment.name }}</td>
+                            <td>{{ equipment.category }}</td>
+                            <td>{{ equipment.patrimony }}</td>
+                            <td>
+                                <span :class="['status-badge', equipment.status]">
+                                    {{ equipment.status }}
+                                </span>
+                            </td>
+                            <td class="actions">
+                                <button 
+                                    @click="editEquipment(equipment)" 
+                                    class="btn-edit"
+                                    title="Editar equipamento"
+                                    aria-label="Editar equipamento"
+                                >
+                                    Editar
+                                </button>
+                                <button 
+                                    @click="deleteEquipment(equipment.id)" 
+                                    class="btn-delete"
+                                    title="Excluir equipamento"
+                                    aria-label="Excluir equipamento"
+                                >
+                                    Remover
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
